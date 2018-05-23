@@ -20,14 +20,14 @@ import javax.xml.soap.SOAPPart;
 public class AbnSearchWSSOAP
 {
 
-	public static void main(String[] args)
+	public  void query(String query)
 	{
 		try
 		{
-			String guid = "<insert your GUID here>";
-			String abn = "69 410 335 356";
+			String guid = "a1013045-797c-45d5-b573-8ee5526c69ec";
+			String abn = query;
 
-			ditr.abn.example.AbnSearchResult result = searchByABN(guid, abn, false);
+			AbnSearchResult result = searchByABN(guid, abn, false);
 
 			if (!result.isException())
 				System.out.println("ABN search for ABN [" + abn + "] returned business name [" + result.getOrganisationName() + "]");
@@ -41,11 +41,10 @@ public class AbnSearchWSSOAP
 		}
 	}
 
-	public static ditr.abn.example.AbnSearchResult searchByABN(String guid, String abn, boolean includeHistorical) throws UnsupportedOperationException,
+	public static AbnSearchResult searchByABN(String guid, String abn, boolean includeHistorical) throws UnsupportedOperationException,
 			SOAPException, IOException, SecurityException, IllegalArgumentException, ClassNotFoundException, NoSuchMethodException,
-			IllegalAccessException, InvocationTargetException
-	{
-		ditr.abn.example.AbnSearchResult result = null;
+			IllegalAccessException, InvocationTargetException {
+		AbnSearchResult result = null;
 
 		// All connections are created by using a connection factory
 		SOAPConnectionFactory conFactory = SOAPConnectionFactory.newInstance();
@@ -111,7 +110,7 @@ public class AbnSearchWSSOAP
 		SOAPBody respBody = response.getSOAPBody();
 
 		// result = new AbnSearchResult(respBody.extractContentAsDocument().getDocumentElement().getChildNodes().item(0));
-		result = new ditr.abn.example.AbnSearchResult(respBody.getFirstChild());
+		result = new AbnSearchResult(respBody.getFirstChild());
 
 		return result;
 	}

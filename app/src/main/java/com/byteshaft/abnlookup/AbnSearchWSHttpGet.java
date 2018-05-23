@@ -1,8 +1,13 @@
 package com.byteshaft.abnlookup;
 
+import android.util.Log;
+
 import com.byteshaft.abnlookup.XMLUtils;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -10,182 +15,194 @@ import java.net.URLEncoder;
 
 import javax.xml.parsers.FactoryConfigurationError;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.soap.SOAPBody;
 
+import org.json.JSONObject;
 import org.xml.sax.SAXException;
 
-public class AbnSearchWSHttpGet
-{
-	private static final String	UTF_8	= "UTF-8";
+import fr.arnaudguyon.xmltojsonlib.XmlToJson;
 
-	public static void main(String[] args)
-	{
-		try
-		{
-			String guid = "<insert your GUID here>";
-			String abn = "69 410 335 356";
+public class AbnSearchWSHttpGet {
 
-			AbnSearchResult result = searchByABN(guid, abn, false);
+    private static final String UTF_8 = "UTF-8";
 
-			if (!result.isException())
-				System.out.println("ABN search for ABN [" + abn + "] returned business name [" + result.getOrganisationName() + "]");
-			else
-				System.out.println("ABN search for ABN [" + abn + "] returned exception [" + result.getExceptionDescription() + "]");
-		}
-		catch (Exception e)
-		{
-			System.err.println("Caught exception : " + e);
-			e.printStackTrace(System.err);
-		}
-	}
+    public void doQuery(String query) {
+        try {
+            String guid = "a1013045-797c-45d5-b573-8ee5526c69ec";
+            String abn = query;
 
-	public static AbnSearchResult searchByABN(String guid, String abn, boolean includeHistorical) throws URISyntaxException, IOException,
-			SAXException, ParserConfigurationException, FactoryConfigurationError
-	{
-		AbnSearchResult results = null;
+            JSONObject result = searchByABNv200506(guid, abn, true);
+            Log.i("TAG", " result  "+ result);
+        } catch (Exception e) {
+            System.err.println("Caught exception : " + e);
+            e.printStackTrace(System.err);
+        }
+    }
 
-		String params = "";
+    public static JSONObject searchByABN(String guid, String abn, boolean includeHistorical) throws URISyntaxException, IOException,
+            SAXException, ParserConfigurationException, FactoryConfigurationError {
+        JSONObject results = null;
 
-		params += "&includeHistoricalDetails=" + encodeBooleanParam(includeHistorical);
-		params += "&searchString=" + URLEncoder.encode(abn, UTF_8);
+        String params = "";
 
-		results = doRequest(guid, "ABRSearchByABN", params);
+        params += "&includeHistoricalDetails=" + encodeBooleanParam(includeHistorical);
+        params += "&searchString=" + URLEncoder.encode(abn, UTF_8);
 
-		return results;
-	}
+        results = doRequest(guid, "ABRSearchByABN", params);
 
-	public static AbnSearchResult searchByACN(String guid, String acn, boolean includeHistorical) throws URISyntaxException, IOException,
-			SAXException, ParserConfigurationException, FactoryConfigurationError
-	{
-		AbnSearchResult results = null;
+        return results;
+    }
 
-		String params = "";
+    public static JSONObject searchByACN(String guid, String acn, boolean includeHistorical) throws URISyntaxException, IOException,
+            SAXException, ParserConfigurationException, FactoryConfigurationError {
+        JSONObject results = null;
 
-		params += "&includeHistoricalDetails=" + encodeBooleanParam(includeHistorical);
-		params += "&searchString=" + URLEncoder.encode(acn, UTF_8);
+        String params = "";
 
-		results = doRequest(guid, "ABRSearchByASIC", params);
+        params += "&includeHistoricalDetails=" + encodeBooleanParam(includeHistorical);
+        params += "&searchString=" + URLEncoder.encode(acn, UTF_8);
 
-		return results;
-	}
+        results = doRequest(guid, "ABRSearchByASIC", params);
 
-	public static AbnSearchResult searchByABNv200506(String guid, String abn, boolean includeHistorical) throws URISyntaxException, IOException,
-			SAXException, ParserConfigurationException, FactoryConfigurationError
-	{
-		AbnSearchResult results = null;
+        return results;
+    }
 
-		String params = "";
+    public static JSONObject searchByABNv200506(String guid, String abn, boolean includeHistorical) throws URISyntaxException, IOException,
+            SAXException, ParserConfigurationException, FactoryConfigurationError {
+        JSONObject results = null;
 
-		params += "&includeHistoricalDetails=" + encodeBooleanParam(includeHistorical);
-		params += "&searchString=" + URLEncoder.encode(abn, UTF_8);
+        String params = "";
 
-		results = doRequest(guid, "SearchByABNv200506", params);
+        params += "&includeHistoricalDetails=" + encodeBooleanParam(includeHistorical);
+        params += "&searchString=" + URLEncoder.encode(abn, UTF_8);
 
-		return results;
-	}
+        results = doRequest(guid, "SearchByABNv201408", params);
 
-	public static AbnSearchResult searchByACNv200506(String guid, String acn, boolean includeHistorical) throws URISyntaxException, IOException,
-			SAXException, ParserConfigurationException, FactoryConfigurationError
-	{
-		AbnSearchResult results = null;
+        return results;
+    }
 
-		String params = "";
+    public static JSONObject searchByACNv200506(String guid, String acn, boolean includeHistorical) throws URISyntaxException, IOException,
+            SAXException, ParserConfigurationException, FactoryConfigurationError {
+        JSONObject results = null;
 
-		params += "&includeHistoricalDetails=" + encodeBooleanParam(includeHistorical);
-		params += "&searchString=" + URLEncoder.encode(acn, UTF_8);
+        String params = "";
 
-		results = doRequest(guid, "SearchByASICv200506", params);
+        params += "&includeHistoricalDetails=" + encodeBooleanParam(includeHistorical);
+        params += "&searchString=" + URLEncoder.encode(acn, UTF_8);
 
-		return results;
-	}
+        results = doRequest(guid, "SearchByASICv200506", params);
 
-	public static AbnSearchResult searchByNameSimpleProtocol(String guid, String name, boolean legal, boolean trading, boolean act, boolean nsw,
-																			  boolean nt, boolean qld, boolean sa, boolean tas, boolean vic, boolean wa, String postcode) throws URISyntaxException, IOException,
-			SAXException, ParserConfigurationException, FactoryConfigurationError
-	{
-		AbnSearchResult results = null;
+        return results;
+    }
 
-		String params = "";
+    public JSONObject searchByNameSimpleProtocol(String guid, String name, boolean legal, boolean trading, boolean act, boolean nsw,
+                                                      boolean nt, boolean qld, boolean sa, boolean tas, boolean vic, boolean wa, String postcode) throws URISyntaxException, IOException,
+            SAXException, ParserConfigurationException, FactoryConfigurationError {
+        JSONObject results;
+        String params = "";
+        params += "&name=" + URLEncoder.encode(name, UTF_8);
+        params += "&legalName=" + encodeBooleanParam(legal);
+        params += "&tradingName=" + encodeBooleanParam(trading);
 
-		params += "&name=" + URLEncoder.encode(name, UTF_8);
+        params += "&ACT=" + encodeBooleanParam(act);
+        params += "&NSW=" + encodeBooleanParam(nsw);
+        params += "&NT=" + encodeBooleanParam(nt);
+        params += "&QLD=" + encodeBooleanParam(qld);
+        params += "&SA=" + encodeBooleanParam(sa);
+        params += "&TAS=" + encodeBooleanParam(tas);
+        params += "&VIC=" + encodeBooleanParam(vic);
+        params += "&WA=" + encodeBooleanParam(wa);
 
-		params += "&legalName=" + encodeBooleanParam(legal);
-		params += "&tradingName=" + encodeBooleanParam(trading);
+        params += "&postcode=" + URLEncoder.encode(postcode, UTF_8);
 
-		params += "&ACT=" + encodeBooleanParam(act);
-		params += "&NSW=" + encodeBooleanParam(nsw);
-		params += "&NT=" + encodeBooleanParam(nt);
-		params += "&QLD=" + encodeBooleanParam(qld);
-		params += "&SA=" + encodeBooleanParam(sa);
-		params += "&TAS=" + encodeBooleanParam(tas);
-		params += "&VIC=" + encodeBooleanParam(vic);
-		params += "&WA=" + encodeBooleanParam(wa);
+        results = doRequest(guid, "ABRSearchByNameSimpleProtocol", params);
 
-		params += "&postcode=" + URLEncoder.encode(postcode, UTF_8);
+        return results;
+    }
 
-		results = doRequest(guid, "ABRSearchByNameSimpleProtocol", params);
+    public static JSONObject searchByNameAdvancedSimpleProtocol(String guid, String name, boolean legal, boolean trading, boolean act,
+                                                                     boolean nsw, boolean nt, boolean qld, boolean sa, boolean tas, boolean vic, boolean wa, String postcode, String width, int minScore)
+            throws URISyntaxException, IOException, SAXException, ParserConfigurationException, FactoryConfigurationError {
 
-		return results;
-	}
+        JSONObject results;
+        String params = "";
+        params += "&name=" + URLEncoder.encode(name, UTF_8);
 
-	public static AbnSearchResult searchByNameAdvancedSimpleProtocol(String guid, String name, boolean legal, boolean trading, boolean act,
-																					  boolean nsw, boolean nt, boolean qld, boolean sa, boolean tas, boolean vic, boolean wa, String postcode, String width, int minScore)
-			throws URISyntaxException, IOException, SAXException, ParserConfigurationException, FactoryConfigurationError
-	{
-		AbnSearchResult results = null;
+        params += "&legalName=" + encodeBooleanParam(legal);
+        params += "&tradingName=" + encodeBooleanParam(trading);
 
-		String params = "";
+        params += "&ACT=" + encodeBooleanParam(act);
+        params += "&NSW=" + encodeBooleanParam(nsw);
+        params += "&NT=" + encodeBooleanParam(nt);
+        params += "&QLD=" + encodeBooleanParam(qld);
+        params += "&SA=" + encodeBooleanParam(sa);
+        params += "&TAS=" + encodeBooleanParam(tas);
+        params += "&VIC=" + encodeBooleanParam(vic);
+        params += "&WA=" + encodeBooleanParam(wa);
 
-		params += "&name=" + URLEncoder.encode(name, UTF_8);
+        params += "&postcode=" + URLEncoder.encode(postcode, UTF_8);
 
-		params += "&legalName=" + encodeBooleanParam(legal);
-		params += "&tradingName=" + encodeBooleanParam(trading);
+//        params += "&searchWidth=" + width;
 
-		params += "&ACT=" + encodeBooleanParam(act);
-		params += "&NSW=" + encodeBooleanParam(nsw);
-		params += "&NT=" + encodeBooleanParam(nt);
-		params += "&QLD=" + encodeBooleanParam(qld);
-		params += "&SA=" + encodeBooleanParam(sa);
-		params += "&TAS=" + encodeBooleanParam(tas);
-		params += "&VIC=" + encodeBooleanParam(vic);
-		params += "&WA=" + encodeBooleanParam(wa);
+        params += "&minimumScore=" + minScore;
 
-		params += "&postcode=" + URLEncoder.encode(postcode, UTF_8);
+        results = doRequest(guid, "ABRSearchByNameAdvancedSimpleProtocol", params);
 
-		params += "&searchWidth=" + width;
+        return results;
+    }
 
-		params += "&minimumScore=" + minScore;
+    private static JSONObject doRequest(String guid, String service, String parameters) throws IOException,
+             FactoryConfigurationError {
+        JSONObject result = null;
+        String res = null;
 
-		results = doRequest(guid, "ABRSearchByNameAdvancedSimpleProtocol", params);
+        URL url = new URL("http://abr.business.gov.au/abrxmlsearch/ABRXMLSearch.asmx/" + service + "?authenticationGuid=" + URLEncoder.encode(guid, UTF_8) + parameters);
 
-		return results;
-	}
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 
-	private static AbnSearchResult doRequest(String guid, String service, String parameters) throws URISyntaxException, IOException, SAXException,
-			ParserConfigurationException, FactoryConfigurationError {
-		AbnSearchResult result = null;
+        connection.setRequestMethod("GET");
+        connection.setRequestProperty("Content-Type", "text/xml; charset-utf-8");
+        connection.connect();
+        Log.i("TAG", "data " + connection.getResponseCode());
+        if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
+            res = readStream(connection.getInputStream());
+            XmlToJson xmlToJson = new XmlToJson.Builder(res).build();
+            result = xmlToJson.toJson();
+        }
+//        Log.i("TAG", "data " +res);
+//            result = new AbnSearchResult(XMLUtils.DOMParseXML(connection.getInputStream()).getDocumentElement());
+        connection.disconnect();
+        return result;
+    }
 
-		URL url = new URL("http://abr.business.gov.au/abrxmlsearch/ABRXMLSearch.asmx/" + service + "?authenticationGuid=" + URLEncoder.encode(guid, UTF_8) + parameters);
+    private static String readStream(InputStream in) {
+        BufferedReader reader = null;
+        StringBuffer response = new StringBuffer();
+        try {
+            reader = new BufferedReader(new InputStreamReader(in));
+            String line = "";
+            while ((line = reader.readLine()) != null) {
+                response.append(line);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return response.toString();
+    }
 
-		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-
-		connection.setRequestMethod("GET");
-		connection.setRequestProperty("Content-Type", "text/xml; charset-utf-8");
-		connection.connect();
-
-		if (connection.getResponseCode() == HttpURLConnection.HTTP_OK)
-			result = new AbnSearchResult(XMLUtils.DOMParseXML(connection.getInputStream()).getDocumentElement());
-
-		connection.disconnect();
-
-		return result;
-	}
-
-	private static String encodeBooleanParam(boolean value)
-	{
-		if (value)
-			return "Y";
-		else
-			return "N";
-	}
+    private static String encodeBooleanParam(boolean value) {
+        if (value)
+            return "Y";
+        else
+            return "N";
+    }
 
 }
