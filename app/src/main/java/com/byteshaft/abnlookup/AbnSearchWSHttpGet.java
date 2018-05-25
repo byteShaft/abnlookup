@@ -2,7 +2,8 @@ package com.byteshaft.abnlookup;
 
 import android.util.Log;
 
-import com.byteshaft.abnlookup.XMLUtils;
+import org.json.JSONObject;
+import org.xml.sax.SAXException;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -15,9 +16,6 @@ import java.net.URLEncoder;
 
 import javax.xml.parsers.FactoryConfigurationError;
 import javax.xml.parsers.ParserConfigurationException;
-
-import org.json.JSONObject;
-import org.xml.sax.SAXException;
 
 import fr.arnaudguyon.xmltojsonlib.XmlToJson;
 
@@ -70,7 +68,7 @@ public class AbnSearchWSHttpGet {
 
     public static JSONObject searchByABNv200506(String guid, String abn, boolean includeHistorical) throws URISyntaxException, IOException,
               FactoryConfigurationError {
-        JSONObject results = null;
+        JSONObject results;
 
         String params = "";
 
@@ -155,8 +153,8 @@ public class AbnSearchWSHttpGet {
     private static JSONObject doRequest(String guid, String service, String parameters) throws IOException,
              FactoryConfigurationError {
         JSONObject result = null;
-        String res = null;
-        URL url = new URL("http://abr.business.gov.au/abrxmlsearch/ABRXMLSearch.asmx/" + service + "?authenticationGuid=" + URLEncoder.encode(guid, UTF_8) + parameters);
+        String res;
+        URL url = new URL("https://abr.business.gov.au/abrxmlsearch/ABRXMLSearch.asmx/" + service + "?authenticationGuid=" + URLEncoder.encode(guid, UTF_8) + parameters);
         Log.i("TAG", "url  "+ url);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 
