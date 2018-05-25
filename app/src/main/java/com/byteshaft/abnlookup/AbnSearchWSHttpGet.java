@@ -15,7 +15,6 @@ import java.net.URLEncoder;
 
 import javax.xml.parsers.FactoryConfigurationError;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.soap.SOAPBody;
 
 import org.json.JSONObject;
 import org.xml.sax.SAXException;
@@ -26,17 +25,19 @@ public class AbnSearchWSHttpGet {
 
     private static final String UTF_8 = "UTF-8";
 
-    public void doQuery(String query) {
+    public JSONObject doQuery(String query) {
+        JSONObject result = null;
         try {
             String guid = "a1013045-797c-45d5-b573-8ee5526c69ec";
             String abn = query;
 
-            JSONObject result = searchByABNv200506(guid, abn, true);
+            result = searchByABNv200506(guid, abn, true);
             Log.i("TAG", " result  "+ result);
         } catch (Exception e) {
             System.err.println("Caught exception : " + e);
             e.printStackTrace(System.err);
         }
+        return result;
     }
 
     public static JSONObject searchByABN(String guid, String abn, boolean includeHistorical) throws URISyntaxException, IOException,
@@ -68,7 +69,7 @@ public class AbnSearchWSHttpGet {
     }
 
     public static JSONObject searchByABNv200506(String guid, String abn, boolean includeHistorical) throws URISyntaxException, IOException,
-            SAXException, ParserConfigurationException, FactoryConfigurationError {
+              FactoryConfigurationError {
         JSONObject results = null;
 
         String params = "";
@@ -155,9 +156,8 @@ public class AbnSearchWSHttpGet {
              FactoryConfigurationError {
         JSONObject result = null;
         String res = null;
-
         URL url = new URL("http://abr.business.gov.au/abrxmlsearch/ABRXMLSearch.asmx/" + service + "?authenticationGuid=" + URLEncoder.encode(guid, UTF_8) + parameters);
-
+        Log.i("TAG", "url  "+ url);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 
         connection.setRequestMethod("GET");
