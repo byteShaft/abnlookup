@@ -15,6 +15,10 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
 }
 
 dependencies {
@@ -25,5 +29,6 @@ dependencies {
     implementation group: 'soap', name: 'soap', version: '2.3.1'
     implementation 'com.github.smart-fun:XmlToJson:1.4.4'
     implementation 'com.github.claudiodegio:MsvSearch:1.0.0'
+    implementation 'com.byteshaft.requests:requests:0.5.2'
 
 }

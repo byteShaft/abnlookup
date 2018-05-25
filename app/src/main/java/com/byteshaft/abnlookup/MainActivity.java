@@ -1,18 +1,24 @@
 package com.byteshaft.abnlookup;
 
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.support.v7.app.AppCompatActivity;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
 import com.claudiodegio.msv.MaterialSearchView;
 import com.claudiodegio.msv.OnSearchViewListener;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -22,6 +28,7 @@ public class MainActivity extends AppCompatActivity {
     private AbnSearchWSHttpGet abnSearchWSHttpGet;
     private Toolbar toolbar;
     private MaterialSearchView materialSearchView;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,36 +40,32 @@ public class MainActivity extends AppCompatActivity {
         materialSearchView = findViewById(R.id.search);
         setSupportActionBar(toolbar);
         abnSearchWSHttpGet = new AbnSearchWSHttpGet();
-        query.setOnClickListener(new View.OnClickListener() {
+        query.setOnClickListener(v -> {
+            String query = editText.getText().toString();
+            new Query().execute(query);
+        });
+        materialSearchView.setOnSearchViewListener(new OnSearchViewListener() {
             @Override
-            public void onClick(View v) {
-//                startActivity(new Intent(MainActivity.this, ActivityLookup.class));
-                String query = editText.getText().toString();
-                new Query().execute(query);
+            public void onSearchViewShown() {
+
+            }
+
+            @Override
+            public void onSearchViewClosed() {
+
+            }
+
+            @Override
+            public boolean onQueryTextSubmit(String s) {
+                Log.i("TAg", s);
+                return false;
+            }
+
+            @Override
+            public void onQueryTextChange(String s) {
+
             }
         });
-       materialSearchView.setOnSearchViewListener(new OnSearchViewListener() {
-           @Override
-           public void onSearchViewShown() {
-
-           }
-
-           @Override
-           public void onSearchViewClosed() {
-
-           }
-
-           @Override
-           public boolean onQueryTextSubmit(String s) {
-               Log.i("TAg", s);
-               return false;
-           }
-
-           @Override
-           public void onQueryTextChange(String s) {
-
-           }
-       });
     }
 
     @Override
@@ -80,13 +83,67 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
-
-    private class Query extends AsyncTask<String, String, String> {
+    private class Query extends AsyncTask<String, String, JSONObject> {
 
         @Override
-        protected String doInBackground(String... strings) {
-            abnSearchWSHttpGet.doQuery(strings[0]);
-            return null;
+        protected JSONObject doInBackground(String... strings) {
+            return abnSearchWSHttpGet.doQuery(strings[0]);
+        }
+
+        @Override
+        protected void onPostExecute(JSONObject jsonObject) {
+            ArrayList<Serializer> serializerArrayList = new ArrayList<>();
+            super.onPostExecute(jsonObject);
+            if (jsonObject != null) {
+                try {
+                    JSONObject mainObject = jsonObject.getJSONObject("ABRPayloadSearchResults");
+                    JSONObject response = mainObject.getJSONObject("response");
+                    JSONObject businessEntity = response.getJSONObject("businessEntity201408");
+
+                    // single objects
+                    JSONObject entityStatusObject = businessEntity.getJSONObject("entityStatus");
+                    JSONObject abn = businessEntity.getJSONObject("ABN");
+
+                    JSONArray physicalAddressArray = businessEntity.getJSONArray("mainBusinessPhysicalAddress");
+                    JSONArray mainNameArray = businessEntity.getJSONArray("mainName");
+
+                    for (int i = 0; i < physicalAddressArray.length(); i++) {
+                        JSONObject addressObject = physicalAddressArray.getJSONObject(i);
+                        Serializer serializer = new Serializer();
+
+                        // single objects
+                        serializer.setEntityStatus(entityStatusObject.getString("entityStatusCode"));
+                        serializer.setIdentifierValue(abn.getString("identifierValue"));
+                        //
+
+                        serializer.setEffectiveTo(addressObject.getString("effectiveTo"));
+                        serializer.setEffectiveFrom(addressObject.getString("effectiveFrom"));
+                        serializer.setPostcode(addressObject.getString("postcode"));
+                        serializer.setStateCode(addressObject.getString("stateCode"));
+
+                        JSONObject mainNameObject = mainNameArray.getJSONObject(i);
+                        serializer.setOrganisationName(mainNameObject.getString("organisationName"));
+                        serializer.setMainNameEffectiveFrom(mainNameObject.getString("effectiveFrom"));
+                        if (mainNameObject.has("effectiveTo")) {
+                            serializer.setMainNameEffectiveTo(mainNameObject.getString("effectiveTo"));
+                        }
+                        serializerArrayList.add(serializer);
+                    }
+                    Intent intent  = new Intent(MainActivity.this, ActivityLookup.class);
+                    intent.putExtra("list", serializerArrayList);
+                    startActivity(intent);
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+
         }
     }
 }

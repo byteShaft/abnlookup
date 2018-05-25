@@ -9,28 +9,22 @@ import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class ActivityLookup extends AppCompatActivity {
 
     private ListView listView;
-    private List<String> items;
+    private List<Serializer> items;
     private ListAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_lookup);
-        items = new ArrayList<>();
-        items.add("ok ");
-        items.add("ok ");
-        items.add("ok ");
-        items.add("ok ");
-        items.add("ok ");
-        items.add("ok ");
-        items.add("ok ");
-        items.add("ok ");
+        items = (List<Serializer>) getIntent().getSerializableExtra("list");
+        for (Serializer s: items) {
+            System.out.println("receive krty huay " + s.getOrganisationName());
+        }
 
         listView = findViewById(R.id.list_view);
         adapter = new ListAdapter(getApplicationContext(), items);
@@ -40,10 +34,9 @@ public class ActivityLookup extends AppCompatActivity {
     private class ListAdapter extends BaseAdapter {
         private ViewHolder viewHolder;
         private Context context;
-        /// change type accordingly
-        private List<String> listItems;
+        private List<Serializer> listItems;
 
-        public ListAdapter(Context context, List<String> listItems) {
+        public ListAdapter(Context context, List<Serializer> listItems) {
             this.context = context;
             this.listItems = listItems;
         }
@@ -56,13 +49,22 @@ public class ActivityLookup extends AppCompatActivity {
                 viewHolder = new ViewHolder();
                 viewHolder.title = convertView.findViewById(R.id.text_view_title);
                 viewHolder.entityName = convertView.findViewById(R.id.text_view_entity_name);
-                viewHolder.activeOrInactive = convertView.findViewById(R.id.text_view_active_or_inactive);
-                viewHolder.cardNumber = convertView.findViewById(R.id.text_view_number);
+                viewHolder.identifierValue = convertView.findViewById(R.id.text_view_identifier_value);
+                viewHolder.stateCode = convertView.findViewById(R.id.text_view_state_code);
+                viewHolder.status = convertView.findViewById(R.id.text_view_state);
+                viewHolder.postCode = convertView.findViewById(R.id.text_view_postcode);
+
                 convertView.setTag(viewHolder);
             } else {
                 viewHolder = (ViewHolder) convertView.getTag();
             }
-            // TODO: 24/05/2018 set values here...
+            Serializer items = listItems.get(position);
+            viewHolder.title.setText(items.getOrganisationName());
+            viewHolder.stateCode.setText(items.getStateCode());
+            viewHolder.postCode.setText(items.getPostcode());
+            //single objects
+            viewHolder.status.setText(items.getEntityStatus());
+            viewHolder.identifierValue.setText(items.identifierValue);
             return convertView;
         }
 
@@ -84,8 +86,10 @@ public class ActivityLookup extends AppCompatActivity {
         private class ViewHolder {
             TextView title;
             TextView entityName;
-            TextView activeOrInactive;
-            TextView cardNumber;
+            TextView identifierValue;
+            TextView status;
+            TextView stateCode;
+            TextView postCode;
         }
     }
 
