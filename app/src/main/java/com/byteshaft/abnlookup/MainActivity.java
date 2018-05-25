@@ -1,12 +1,12 @@
 package com.byteshaft.abnlookup;
 
 import android.os.AsyncTask;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -36,6 +36,7 @@ public class MainActivity extends AppCompatActivity {
         query.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+//                startActivity(new Intent(MainActivity.this, ActivityLookup.class));
                 String query = editText.getText().toString();
                 new Query().execute(query);
             }
