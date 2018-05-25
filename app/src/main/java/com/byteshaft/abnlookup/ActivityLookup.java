@@ -3,6 +3,7 @@ package com.byteshaft.abnlookup;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.SearchView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -16,19 +17,32 @@ public class ActivityLookup extends AppCompatActivity {
     private ListView listView;
     private List<Serializer> items;
     private ListAdapter adapter;
+    private android.support.v7.widget.SearchView searchView;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_lookup);
         items = (List<Serializer>) getIntent().getSerializableExtra("list");
-        for (Serializer s: items) {
-            System.out.println("receive krty huay " + s.getOrganisationName());
-        }
-
         listView = findViewById(R.id.list_view);
+        searchView = findViewById(R.id.search_view);
         adapter = new ListAdapter(getApplicationContext(), items);
         listView.setAdapter(adapter);
+
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                // TODO: 25/05/2018 addd search query here 
+                return true;
+            }
+        });
+
     }
 
     private class ListAdapter extends BaseAdapter {
