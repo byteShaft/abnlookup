@@ -6,8 +6,7 @@ import java.lang.reflect.InvocationTargetException;
 
 import org.w3c.dom.Node;
 
-public class AbnSearchResult
-{
+public class AbnSearchResult {
 	private Node searchResultsPayload;
 
 	public AbnSearchResult(Node searchResultsPayload) {

@@ -6,10 +6,59 @@ public class Serializer implements Serializable {
 
     // Physical Addresses//
 
-    String effectiveTo;
-    String postcode;
-    String stateCode;
-    String effectiveFrom;
+    private String effectiveTo;
+    private String postcode;
+    private String stateCode;
+    private String effectiveFrom;
+    private String ABN;
+
+    public boolean isCurrentIndicator() {
+        return isCurrentIndicator;
+    }
+
+    public void setCurrentIndicator(boolean currentIndicator) {
+        isCurrentIndicator = currentIndicator;
+    }
+
+    private boolean isCurrentIndicator;
+
+    public boolean isAbnActive() {
+        return abnActive;
+    }
+
+    public void setAbnActive(boolean abnActive) {
+        this.abnActive = abnActive;
+    }
+
+    public String getAbnFrom() {
+        return abnFrom;
+    }
+
+    public void setAbnFrom(String abnFrom) {
+        this.abnFrom = abnFrom;
+    }
+
+    private boolean abnActive;
+    private String abnFrom;
+
+    public String getABN() {
+        return ABN;
+    }
+
+    public void setABN(String ABN) {
+        this.ABN = ABN;
+    }
+
+    public String getACN() {
+        return ACN;
+    }
+
+    public void setACN(String ACN) {
+        this.ACN = ACN;
+    }
+
+    private String ACN;
+
 
     public String getEffectiveTo() {
         return effectiveTo;

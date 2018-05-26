@@ -4,9 +4,13 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.BaseAdapter;
+import android.widget.EditText;
+import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -17,31 +21,27 @@ public class ActivityLookup extends AppCompatActivity {
     private ListView listView;
     private List<Serializer> items;
     private ListAdapter adapter;
-    private android.support.v7.widget.SearchView searchView;
-
+    private EditText searchView;
+    private String query;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_lookup);
+        query = getIntent().getStringExtra("search_value");
+        Log.i("TAG", "received " + query);
         items = (List<Serializer>) getIntent().getSerializableExtra("list");
         listView = findViewById(R.id.list_view);
         searchView = findViewById(R.id.search_view);
         adapter = new ListAdapter(getApplicationContext(), items);
         listView.setAdapter(adapter);
-
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                return false;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                // TODO: 25/05/2018 addd search query here 
-                return true;
-            }
-        });
+        searchView.setText(query);
+        searchView.setEnabled(false);
+        searchView.clearFocus();
+        if (searchView != null) {
+            InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(searchView.getWindowToken(), 0);
+        }
 
     }
 
@@ -67,7 +67,6 @@ public class ActivityLookup extends AppCompatActivity {
                 viewHolder.stateCode = convertView.findViewById(R.id.text_view_state_code);
                 viewHolder.status = convertView.findViewById(R.id.text_view_state);
                 viewHolder.postCode = convertView.findViewById(R.id.text_view_postcode);
-
                 convertView.setTag(viewHolder);
             } else {
                 viewHolder = (ViewHolder) convertView.getTag();
@@ -77,8 +76,23 @@ public class ActivityLookup extends AppCompatActivity {
             viewHolder.stateCode.setText(items.getStateCode());
             viewHolder.postCode.setText(items.getPostcode());
             //single objects
-            viewHolder.status.setText(items.getEntityStatus());
-            viewHolder.identifierValue.setText(items.identifierValue);
+            Log.i("ADAPTER ", " identifier value " + items.identifierValue);
+            if (items.getEntityStatus() != null) {
+                viewHolder.status.setText(items.getEntityStatus());
+            } else {
+                if (items.isAbnActive()) {
+                    viewHolder.status.setText("Active");
+                    viewHolder.status.setTextColor(getResources().getColor(android.R.color.holo_green_light));
+                } else {
+                    viewHolder.status.setText("Cancelled");
+                    viewHolder.status.setTextColor(getResources().getColor(android.R.color.holo_red_light));
+                }
+            }
+            if (items.identifierValue != null && !items.identifierValue.isEmpty()) {
+                viewHolder.identifierValue.setText(String.valueOf(items.identifierValue));
+            } else {
+                viewHolder.identifierValue.setText("");
+            }
             return convertView;
         }
 

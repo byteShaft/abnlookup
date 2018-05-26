@@ -21,15 +21,15 @@ import fr.arnaudguyon.xmltojsonlib.XmlToJson;
 
 public class AbnSearchWSHttpGet {
 
+    String guid = "a1013045-797c-45d5-b573-8ee5526c69ec";
+
     private static final String UTF_8 = "UTF-8";
 
-    public JSONObject doQuery(String query) {
+    public JSONObject doQuery(String query, boolean value) {
         JSONObject result = null;
         try {
-            String guid = "a1013045-797c-45d5-b573-8ee5526c69ec";
             String abn = query;
-
-            result = searchByABNv200506(guid, abn, true);
+            result = searchByABNv200506(abn, true);
             Log.i("TAG", " result  "+ result);
         } catch (Exception e) {
             System.err.println("Caught exception : " + e);
@@ -38,7 +38,7 @@ public class AbnSearchWSHttpGet {
         return result;
     }
 
-    public static JSONObject searchByABN(String guid, String abn, boolean includeHistorical) throws URISyntaxException, IOException,
+    public JSONObject searchByABN(String abn, boolean includeHistorical) throws URISyntaxException, IOException,
             SAXException, ParserConfigurationException, FactoryConfigurationError {
         JSONObject results = null;
 
@@ -47,26 +47,24 @@ public class AbnSearchWSHttpGet {
         params += "&includeHistoricalDetails=" + encodeBooleanParam(includeHistorical);
         params += "&searchString=" + URLEncoder.encode(abn, UTF_8);
 
-        results = doRequest(guid, "ABRSearchByABN", params);
+        results = doRequest("ABRSearchByABN", params);
 
         return results;
     }
 
-    public static JSONObject searchByACN(String guid, String acn, boolean includeHistorical) throws URISyntaxException, IOException,
-            SAXException, ParserConfigurationException, FactoryConfigurationError {
+    public JSONObject searchByACN(String acn, boolean includeHistorical) throws IOException
+            , FactoryConfigurationError {
         JSONObject results = null;
-
         String params = "";
-
         params += "&includeHistoricalDetails=" + encodeBooleanParam(includeHistorical);
         params += "&searchString=" + URLEncoder.encode(acn, UTF_8);
 
-        results = doRequest(guid, "ABRSearchByASIC", params);
+        results = doRequest("ABRSearchByASIC", params);
 
         return results;
     }
 
-    public static JSONObject searchByABNv200506(String guid, String abn, boolean includeHistorical) throws URISyntaxException, IOException,
+    public JSONObject searchByABNv200506(String abn, boolean includeHistorical) throws URISyntaxException, IOException,
               FactoryConfigurationError {
         JSONObject results;
 
@@ -75,12 +73,12 @@ public class AbnSearchWSHttpGet {
         params += "&includeHistoricalDetails=" + encodeBooleanParam(includeHistorical);
         params += "&searchString=" + URLEncoder.encode(abn, UTF_8);
 
-        results = doRequest(guid, "SearchByABNv201408", params);
+        results = doRequest("SearchByABNv201408", params);
 
         return results;
     }
 
-    public static JSONObject searchByACNv200506(String guid, String acn, boolean includeHistorical) throws URISyntaxException, IOException,
+    public JSONObject searchByACNv200506(String acn, boolean includeHistorical) throws URISyntaxException, IOException,
             SAXException, ParserConfigurationException, FactoryConfigurationError {
         JSONObject results = null;
 
@@ -89,12 +87,12 @@ public class AbnSearchWSHttpGet {
         params += "&includeHistoricalDetails=" + encodeBooleanParam(includeHistorical);
         params += "&searchString=" + URLEncoder.encode(acn, UTF_8);
 
-        results = doRequest(guid, "SearchByASICv200506", params);
+        results = doRequest("SearchByASICv200506", params);
 
         return results;
     }
 
-    public JSONObject searchByNameSimpleProtocol(String guid, String name, boolean legal, boolean trading, boolean act, boolean nsw,
+    public JSONObject searchByNameSimpleProtocol(String name, boolean legal, boolean trading, boolean act, boolean nsw,
                                                       boolean nt, boolean qld, boolean sa, boolean tas, boolean vic, boolean wa, String postcode) throws URISyntaxException, IOException,
             SAXException, ParserConfigurationException, FactoryConfigurationError {
         JSONObject results;
@@ -114,12 +112,12 @@ public class AbnSearchWSHttpGet {
 
         params += "&postcode=" + URLEncoder.encode(postcode, UTF_8);
 
-        results = doRequest(guid, "ABRSearchByNameSimpleProtocol", params);
+        results = doRequest("ABRSearchByNameSimpleProtocol", params);
 
         return results;
     }
 
-    public static JSONObject searchByNameAdvancedSimpleProtocol(String guid, String name, boolean legal, boolean trading, boolean act,
+    public JSONObject searchByNameAdvancedSimpleProtocol(String guid, String name, boolean legal, boolean trading, boolean act,
                                                                      boolean nsw, boolean nt, boolean qld, boolean sa, boolean tas, boolean vic, boolean wa, String postcode, String width, int minScore)
             throws URISyntaxException, IOException, SAXException, ParserConfigurationException, FactoryConfigurationError {
 
@@ -145,12 +143,12 @@ public class AbnSearchWSHttpGet {
 
         params += "&minimumScore=" + minScore;
 
-        results = doRequest(guid, "ABRSearchByNameAdvancedSimpleProtocol", params);
+        results = doRequest("ABRSearchByNameAdvancedSimpleProtocol", params);
 
         return results;
     }
 
-    private static JSONObject doRequest(String guid, String service, String parameters) throws IOException,
+    private JSONObject doRequest(String service, String parameters) throws IOException,
              FactoryConfigurationError {
         JSONObject result = null;
         String res;
