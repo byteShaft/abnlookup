@@ -87,6 +87,7 @@
                     android:textStyle="bold" />
 
                 <TextView
+                    android:id="@+id/text_view_postcode"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginRight="14dp"
