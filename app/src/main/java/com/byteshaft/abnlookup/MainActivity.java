@@ -19,6 +19,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.List;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -28,17 +29,32 @@ public class MainActivity extends AppCompatActivity {
     private AbnSearchWSHttpGet abnSearchWSHttpGet;
     private Toolbar toolbar;
     private MaterialSearchView materialSearchView;
-
+    private MultiSelectionSpinner spinner;
+    private List<String> dataset;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         editText = findViewById(R.id.editText);
+        spinner = findViewById(R.id.spinner);
         query = findViewById(R.id.button);
         toolbar = findViewById(R.id.toolbar);
         materialSearchView = findViewById(R.id.search);
         setSupportActionBar(toolbar);
+        List<String> list = new ArrayList<>();
+        list.add("ACT");
+        list.add("NSW");
+        list.add("QLD");
+        list.add("SA");
+        list.add("TAS");
+        list.add("VIC");
+        list.add("WA");
+        spinner.setItems(list);
+        spinner.setSelection(0);
+        spinner.getSelectedItemsAsString();
+
+        Log.wtf("Items ", spinner.getSelectedItemsAsString());
         abnSearchWSHttpGet = new AbnSearchWSHttpGet();
         query.setOnClickListener(v -> {
             String query = editText.getText().toString();
@@ -129,7 +145,7 @@ public class MainActivity extends AppCompatActivity {
                         }
                         serializerArrayList.add(serializer);
                     }
-                    Intent intent  = new Intent(MainActivity.this, ActivityLookup.class);
+                    Intent intent = new Intent(MainActivity.this, ActivityLookup.class);
                     intent.putExtra("list", serializerArrayList);
                     startActivity(intent);
 
