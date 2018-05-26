@@ -17,9 +17,6 @@ import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
-import com.claudiodegio.msv.MaterialSearchView;
-import com.claudiodegio.msv.OnSearchViewListener;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -40,8 +37,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Button query;
 
     private AbnSearchWSHttpGet abnSearchWSHttpGet;
-    private Toolbar toolbar;
-    private MaterialSearchView materialSearchView;
     private String searchValue = "";
     private MultiSelectionSpinner spinner;
     private List<String> dataset;
@@ -54,9 +49,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         editText = findViewById(R.id.editText);
         spinner = findViewById(R.id.spinner);
         query = findViewById(R.id.button);
-        toolbar = findViewById(R.id.toolbar);
-        materialSearchView = findViewById(R.id.search);
-        setSupportActionBar(toolbar);
         List<String> list = new ArrayList<>();
         list.add("ACT");
         list.add("NSW");
@@ -68,33 +60,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         spinner.setItems(list);
         spinner.setSelection(0);
         spinner.getSelectedItemsAsString();
-
         Log.wtf("Items ", spinner.getSelectedItemsAsString());
         abnSearchWSHttpGet = new AbnSearchWSHttpGet();
         query.setOnClickListener(this);
         postCode.setOnClickListener(this);
-        materialSearchView.setOnSearchViewListener(new OnSearchViewListener() {
-            @Override
-            public void onSearchViewShown() {
-
-            }
-
-            @Override
-            public void onSearchViewClosed() {
-
-            }
-
-            @Override
-            public boolean onQueryTextSubmit(String s) {
-                Log.i("TAg", s);
-                return false;
-            }
-
-            @Override
-            public void onQueryTextChange(String s) {
-
-            }
-        });
     }
 
     private void addPostCode() {
@@ -133,7 +102,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         getMenuInflater().inflate(R.menu.main, menu);
 
         MenuItem item = menu.findItem(R.id.action_search);
-        materialSearchView.setMenuItem(item);
 
         return true;
     }
@@ -145,6 +113,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 addPostCode();
                 break;
             case R.id.button:
+                Log.wtf("Items ", spinner.getSelectedItemsAsString());
                 String query = editText.getText().toString();
                 searchValue = String.valueOf(query);
                 new Query().execute(query);
@@ -198,6 +167,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         @Override
         protected void onPostExecute(JSONObject jsonObject) {
+            if (LoadingActivity.getInstance() != null) {
+                LoadingActivity.getInstance().finish();
+                overridePendingTransition(R.anim.left_to_right, R.anim.right_to_left);
+
+            }
             ArrayList<Serializer> serializerArrayList = new ArrayList<>();
             super.onPostExecute(jsonObject);
             Log.i("MODE", "mode " + MODE);
@@ -356,13 +330,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     }
                     break;
             }
-            if (LoadingActivity.getInstance() != null) {
-                LoadingActivity.getInstance().finish();
-            }
+
             Intent intent = new Intent(MainActivity.this, ActivityLookup.class);
             intent.putExtra("search_value", searchValue);
             intent.putExtra("list", serializerArrayList);
             startActivity(intent);
+            overridePendingTransition(R.anim.right_to_left, R.anim.left_to_right);
 
         }
     }

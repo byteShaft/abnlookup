@@ -2,4 +2,11 @@
     <string name="app_name">Abnlookup</string>
     <string name="set">Set</string>
     <string name="cancel">Cancel</string>
+
+    <string-array name="name_array">
+        <item>All</item>
+        <item>Entity Name</item>
+        <item>Business Name</item>
+        <item>Trading Name</item>
+    </string-array>
 </resources>
