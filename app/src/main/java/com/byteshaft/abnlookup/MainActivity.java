@@ -1,15 +1,21 @@
 package com.byteshaft.abnlookup;
 
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.InputType;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
+import android.widget.TextView;
 
 import com.claudiodegio.msv.MaterialSearchView;
 import com.claudiodegio.msv.OnSearchViewListener;
@@ -22,35 +28,51 @@ import org.xml.sax.SAXException;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.xml.parsers.ParserConfigurationException;
 
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     private EditText editText;
+    private TextView postCode;
     private Button query;
+
     private AbnSearchWSHttpGet abnSearchWSHttpGet;
     private Toolbar toolbar;
     private MaterialSearchView materialSearchView;
     private String searchValue = "";
+    private MultiSelectionSpinner spinner;
+    private List<String> dataset;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        postCode = findViewById(R.id.text_view_postcode);
         editText = findViewById(R.id.editText);
+        spinner = findViewById(R.id.spinner);
         query = findViewById(R.id.button);
         toolbar = findViewById(R.id.toolbar);
         materialSearchView = findViewById(R.id.search);
         setSupportActionBar(toolbar);
+        List<String> list = new ArrayList<>();
+        list.add("ACT");
+        list.add("NSW");
+        list.add("QLD");
+        list.add("SA");
+        list.add("TAS");
+        list.add("VIC");
+        list.add("WA");
+        spinner.setItems(list);
+        spinner.setSelection(0);
+        spinner.getSelectedItemsAsString();
+
+        Log.wtf("Items ", spinner.getSelectedItemsAsString());
         abnSearchWSHttpGet = new AbnSearchWSHttpGet();
-        query.setOnClickListener(v -> {
-            String query = editText.getText().toString();
-            searchValue = String.valueOf(query);
-            Log.i("TAG", "value " + searchValue);
-            new Query().execute(query);
-        });
+        query.setOnClickListener(this);
+        postCode.setOnClickListener(this);
         materialSearchView.setOnSearchViewListener(new OnSearchViewListener() {
             @Override
             public void onSearchViewShown() {
@@ -75,6 +97,32 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    private void addPostCode() {
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(MainActivity.this);
+        alertDialog.setTitle("Enter Postcode");
+        alertDialog.setMessage("");
+        FrameLayout container = new FrameLayout(MainActivity.this);
+        EditText input = (EditText) getLayoutInflater().inflate(R.layout.dialog_editext, null);
+        input.setInputType(InputType.TYPE_CLASS_NUMBER);
+        FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT);
+        lp.leftMargin = getResources().getDimensionPixelSize(R.dimen.dialog_margin);
+        lp.rightMargin = getResources().getDimensionPixelSize(R.dimen.dialog_margin);
+        lp.bottomMargin = getResources().getDimensionPixelSize(R.dimen.dialog_margin);
+        container.addView(input);
+        input.setLayoutParams(lp);
+        alertDialog.setView(container);
+        alertDialog.setPositiveButton(getString(R.string.set),
+                (dialog, which) -> {
+                    String wishlist = input.getText().toString();
+                    postCode.setText(wishlist);
+                });
+        alertDialog.setNegativeButton(getString(R.string.cancel),
+                (dialog, which) -> dialog.cancel());
+        alertDialog.show();
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -88,6 +136,20 @@ public class MainActivity extends AppCompatActivity {
         materialSearchView.setMenuItem(item);
 
         return true;
+    }
+
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.text_view_postcode:
+                addPostCode();
+                break;
+            case R.id.button:
+                String query = editText.getText().toString();
+                searchValue = String.valueOf(query);
+                new Query().execute(query);
+                break;
+        }
     }
 
     private class Query extends AsyncTask<String, String, JSONObject> {
@@ -193,13 +255,6 @@ public class MainActivity extends AppCompatActivity {
                             JSONObject response = mainObject.getJSONObject("response");
                             JSONObject mainList = response.getJSONObject("searchResultsList");
                             JSONArray jsonArray = mainList.getJSONArray("searchResultsRecord");
-//                             single objects
-//                            JSONObject entityStatusObject = businessEntity.getJSONObject("entityStatus");
-//                            String acn = businessEntity.getString("ASICNumber");
-
-//                            JSONArray physicalAddressArray = businessEntity.getJSONArray("mainBusinessPhysicalAddress");
-//                            JSONArray mainNameArray = businessEntity.getJSONArray("searchResultsRecord");
-
                             for (int i = 0; i < jsonArray.length(); i++) {
                                 JSONObject singleOrgdata = jsonArray.getJSONObject(i);
                                 Log.i("TAG", "single main " + singleOrgdata);
