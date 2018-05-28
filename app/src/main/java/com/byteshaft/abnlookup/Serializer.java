@@ -12,6 +12,26 @@ public class Serializer implements Serializable {
     private String effectiveFrom;
     private String ABN;
 
+    public String getEntityType() {
+        return entityType;
+    }
+
+    public void setEntityType(String entityType) {
+        this.entityType = entityType;
+    }
+
+    private String entityType;
+
+    public String getEntityEffectiveFrom() {
+        return entityEffectiveFrom;
+    }
+
+    public void setEntityEffectiveFrom(String entityEffectiveFrom) {
+        this.entityEffectiveFrom = entityEffectiveFrom;
+    }
+
+    private String entityEffectiveFrom;
+
     public boolean isCurrentIndicator() {
         return isCurrentIndicator;
     }

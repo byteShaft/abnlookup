@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/gradient_background">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="10dp"
+            android:layout_marginStart="10dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/entity_name_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:padding="2dp"
+                android:text="Entity Name"
+                android:textColor="@android:color/white"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/entity_name_value"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:background="@drawable/round_text_view"
+                android:elevation="4dp"
+                android:padding="10dp"
+                android:textColor="@color/cardview_dark_background"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/abn_status_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:padding="2dp"
+                android:text="ABN Status"
+                android:textColor="@android:color/white"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/abn_status_value"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:background="@drawable/round_text_view"
+                android:elevation="4dp"
+                android:padding="10dp"
+                android:textColor="@color/cardview_dark_background"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/entity_type"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:padding="2dp"
+                android:text="Entity Type"
+                android:textColor="@android:color/white"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/entity_type_value"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/round_text_view"
+                android:padding="10dp"
+                android:textColor="@color/cardview_dark_background"
+                android:textSize="14sp"
+                android:textStyle="italic" />
+
+
+            <TextView
+                android:id="@+id/gst"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:padding="2dp"
+                android:text="Goods &amp; Services Tax (GST)"
+                android:textColor="@android:color/white"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/gst_value"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/round_text_view"
+                android:padding="10dp"
+                android:textColor="@color/cardview_dark_background"
+                android:textSize="14sp"
+                android:textStyle="italic" />
+
+
+            <TextView
+                android:id="@+id/main_business_location"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
+                android:padding="2dp"
+                android:text="Main business location"
+                android:textColor="@android:color/white"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/main_business_location_value"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:background="@drawable/round_text_view"
+                android:elevation="4dp"
+                android:padding="10dp"
+                android:textColor="@color/cardview_dark_background"
+                android:textStyle="bold" />
+
+
+            <TextView
+                android:id="@+id/business_names"
+                android:layout_marginTop="10dp"
+                android:textColor="@android:color/white"
+                android:text="Business Names"
+                android:textStyle="bold"
+                android:textSize="18sp"
+                android:padding="2dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <android.support.v7.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                app:cardCornerRadius="5dp"
+                app:cardElevation="4dp">
+
+                <LinearLayout
+                    android:id="@+id/business_names_layout"
+                    android:orientation="vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
+
+            </android.support.v7.widget.CardView>
+
+
+            <TextView
+                android:id="@+id/trading_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
+                android:padding="2dp"
+                android:text="Trading Name"
+                android:textColor="@android:color/white"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/trading_name_location"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:background="@drawable/round_text_view"
+                android:elevation="4dp"
+                android:padding="10dp"
+                android:textColor="@color/cardview_dark_background"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/abn_last_updated"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
+                android:padding="2dp"
+                android:text="ABN last updated"
+                android:textColor="@android:color/white"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/abn_last_updated_value"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:background="@drawable/round_text_view"
+                android:elevation="4dp"
+                android:padding="10dp"
+                android:textColor="@color/cardview_dark_background"
+                android:textStyle="bold" />
+
+
+        </LinearLayout>
+
+    </ScrollView>
+
+</RelativeLayout>
