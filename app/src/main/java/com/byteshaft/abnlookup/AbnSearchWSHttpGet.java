@@ -1,6 +1,9 @@
 package com.byteshaft.abnlookup;
 
+import android.app.Activity;
+import android.content.Context;
 import android.util.Log;
+import android.widget.Toast;
 
 import org.json.JSONObject;
 import org.xml.sax.SAXException;
@@ -21,7 +24,12 @@ import fr.arnaudguyon.xmltojsonlib.XmlToJson;
 
 public class AbnSearchWSHttpGet {
 
-    String guid = "a1013045-797c-45d5-b573-8ee5526c69ec";
+    public AbnSearchWSHttpGet(Activity context) {
+        this.context = context;
+    }
+
+    private String guid = "a1013045-797c-45d5-b573-8ee5526c69ec";
+    private Activity context;
 
     private static final String UTF_8 = "UTF-8";
 
@@ -30,7 +38,7 @@ public class AbnSearchWSHttpGet {
         try {
             String abn = query;
             result = searchByABNv200506(abn, true);
-            Log.i("TAG", " result  "+ result);
+            Log.i("TAG", " result  " + result);
         } catch (Exception e) {
             System.err.println("Caught exception : " + e);
             e.printStackTrace(System.err);
@@ -58,6 +66,8 @@ public class AbnSearchWSHttpGet {
         String params = "";
         params += "&includeHistoricalDetails=" + encodeBooleanParam(includeHistorical);
         params += "&searchString=" + URLEncoder.encode(acn, UTF_8);
+        params += "&activeABNsOnly=Y";
+
 
         results = doRequest("ABRSearchByASIC", params);
 
@@ -65,13 +75,15 @@ public class AbnSearchWSHttpGet {
     }
 
     public JSONObject searchByABNv200506(String abn, boolean includeHistorical) throws URISyntaxException, IOException,
-              FactoryConfigurationError {
+            FactoryConfigurationError {
         JSONObject results;
 
         String params = "";
 
         params += "&includeHistoricalDetails=" + encodeBooleanParam(includeHistorical);
         params += "&searchString=" + URLEncoder.encode(abn, UTF_8);
+        params += "&activeABNsOnly=Y";
+
 
         results = doRequest("SearchByABNv201408", params);
 
@@ -80,7 +92,7 @@ public class AbnSearchWSHttpGet {
 
     public JSONObject searchByACNv200506(String acn, boolean includeHistorical) throws URISyntaxException, IOException,
             SAXException, ParserConfigurationException, FactoryConfigurationError {
-        JSONObject results = null;
+        JSONObject results;
 
         String params = "";
 
@@ -92,15 +104,26 @@ public class AbnSearchWSHttpGet {
         return results;
     }
 
-    public JSONObject searchByNameSimpleProtocol(String name, boolean legal, boolean trading, boolean act, boolean nsw,
-                                                      boolean nt, boolean qld, boolean sa, boolean tas, boolean vic, boolean wa, String postcode) throws URISyntaxException, IOException,
-            SAXException, ParserConfigurationException, FactoryConfigurationError {
+    public JSONObject searchByNameSimpleProtocol(String name, boolean allName, boolean entityName,
+                                                 boolean businessName, boolean tradingName, boolean act, boolean nsw,
+                                                 boolean nt, boolean qld, boolean sa, boolean tas,
+                                                 boolean vic, boolean wa, boolean allStates,
+                                                 String postcode) throws IOException,
+            FactoryConfigurationError {
         JSONObject results;
         String params = "";
         params += "&name=" + URLEncoder.encode(name, UTF_8);
-        params += "&legalName=" + encodeBooleanParam(legal);
-        params += "&tradingName=" + encodeBooleanParam(trading);
+        params += "&legalName=" + encodeBooleanParam(true);
+        params += "&AllNames=" + encodeBooleanParam(allName);
+        params += "&EntityName=" + encodeBooleanParam(entityName);
+        params += "&BusinessName=" + encodeBooleanParam(businessName);
+        params += "&TradingName=" + encodeBooleanParam(tradingName);
+        params += "&searchWidth=" + URLEncoder.encode("typical", UTF_8);
+        params += "&minimumScore=" + URLEncoder.encode("50", UTF_8);
+        params += "&maxSearchResults=" + URLEncoder.encode("200", UTF_8);
 
+
+        params += "&AllStates=" + encodeBooleanParam(allStates);
         params += "&ACT=" + encodeBooleanParam(act);
         params += "&NSW=" + encodeBooleanParam(nsw);
         params += "&NT=" + encodeBooleanParam(nt);
@@ -109,16 +132,17 @@ public class AbnSearchWSHttpGet {
         params += "&TAS=" + encodeBooleanParam(tas);
         params += "&VIC=" + encodeBooleanParam(vic);
         params += "&WA=" + encodeBooleanParam(wa);
+        params += "&activeABNsOnly=" + encodeBooleanParam(true);
 
         params += "&postcode=" + URLEncoder.encode(postcode, UTF_8);
 
-        results = doRequest("ABRSearchByNameSimpleProtocol", params);
+        results = doRequest("ABRSearchByNameAdvancedSimpleProtocol2017", params);
 
         return results;
     }
 
     public JSONObject searchByNameAdvancedSimpleProtocol(String guid, String name, boolean legal, boolean trading, boolean act,
-                                                                     boolean nsw, boolean nt, boolean qld, boolean sa, boolean tas, boolean vic, boolean wa, String postcode, String width, int minScore)
+                                                         boolean nsw, boolean nt, boolean qld, boolean sa, boolean tas, boolean vic, boolean wa, String postcode, String width, int minScore)
             throws URISyntaxException, IOException, SAXException, ParserConfigurationException, FactoryConfigurationError {
 
         JSONObject results;
@@ -149,21 +173,28 @@ public class AbnSearchWSHttpGet {
     }
 
     private JSONObject doRequest(String service, String parameters) throws IOException,
-             FactoryConfigurationError {
+            FactoryConfigurationError {
         JSONObject result = null;
         String res;
         URL url = new URL("https://abr.business.gov.au/abrxmlsearch/ABRXMLSearch.asmx/" + service + "?authenticationGuid=" + URLEncoder.encode(guid, UTF_8) + parameters);
-        Log.i("TAG", "url  "+ url);
+        Log.i("TAG", "url  " + url);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-
         connection.setRequestMethod("GET");
         connection.setRequestProperty("Content-Type", "text/xml; charset-utf-8");
         connection.connect();
         Log.i("TAG", "data " + connection.getResponseCode());
-        if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
+        int resCode = connection.getResponseCode();
+        if (resCode == HttpURLConnection.HTTP_OK) {
             res = readStream(connection.getInputStream());
             XmlToJson xmlToJson = new XmlToJson.Builder(res).build();
             result = xmlToJson.toJson();
+        } else if (resCode == 500) {
+            context.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(context, "Internal server error", Toast.LENGTH_SHORT).show();
+                }
+            });
         }
 //        Log.i("TAG", "data " +res);
 //            result = new AbnSearchResult(XMLUtils.DOMParseXML(connection.getInputStream()).getDocumentElement());

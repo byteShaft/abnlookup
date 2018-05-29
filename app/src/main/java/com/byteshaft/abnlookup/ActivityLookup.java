@@ -124,7 +124,6 @@ public class ActivityLookup extends AppCompatActivity {
             viewHolder.stateCode.setText(items.getStateCode());
             viewHolder.postCode.setText(items.getPostcode());
             //single objects
-            Log.i("ADAPTER ", " identifier value " + items.identifierValue);
             if (items.getEntityStatus() != null) {
                 viewHolder.status.setText(items.getEntityStatus());
             } else {

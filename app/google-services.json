@@ -1,0 +1,46 @@
+{
+"project_info": {
+"project_number": "121915739363",
+"firebase_url": "https://abn-lookup.firebaseio.com",
+"project_id": "abn-lookup",
+"storage_bucket": "abn-lookup.appspot.com"
+},
+"client": [
+{
+"client_info": {
+"mobilesdk_app_id": "1:121915739363:android:e4c8d589b59602b6",
+"android_client_info": {
+"package_name": "com.alazoitech.abntool"
+}
+},
+"oauth_client": [
+{
+"client_id": "121915739363-08uvbp8tp125vd2om8u90514u5or33mu.apps.googleusercontent.com",
+"client_type": 3
+},
+{
+"client_id": "121915739363-08uvbp8tp125vd2om8u90514u5or33mu.apps.googleusercontent.com",
+"client_type": 3
+}
+],
+"api_key": [
+{
+"current_key": "AIzaSyCfPc7ATCbSsU4o0l4JT4aupRB6C2C2UXg"
+}
+],
+"services": {
+"analytics_service": {
+"status": 1
+},
+"appinvite_service": {
+"status": 1,
+"other_platform_oauth_client": []
+},
+"ads_service": {
+"status": 2
+}
+}
+}
+],
+"configuration_version": "1"
+}

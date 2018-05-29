@@ -19,6 +19,7 @@ import org.xml.sax.SAXException;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Map;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -33,6 +34,8 @@ public class LoadingActivity extends Activity {
     private String searchValue = "";
     private AbnSearchWSHttpGet abnSearchWSHttpGet;
     private int mode;
+    private String nameTYpe;
+    private String postCode;
 
     public static LoadingActivity getInstance() {
         return instance;
@@ -45,7 +48,7 @@ public class LoadingActivity extends Activity {
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.loading_screen);
-        abnSearchWSHttpGet = new AbnSearchWSHttpGet();
+        abnSearchWSHttpGet = new AbnSearchWSHttpGet(this);
         searchValue = getIntent().getStringExtra("query");
         mode = getIntent().getIntExtra("mode", 0);
         spinKitView = findViewById(R.id.spin_kit);
@@ -80,10 +83,34 @@ public class LoadingActivity extends Activity {
                 }
 
             } else if (isAlpha(strings[0])) {
+                boolean allName = MainActivity.selectedNameType.get("All");
+                boolean entityName = MainActivity.selectedNameType.get("Entity Name");
+                boolean businessName = MainActivity.selectedNameType.get("Business Name");
+                boolean tradingName = MainActivity.selectedNameType.get("Trading Name");
+
+                boolean act = MainActivity.selectedStates.get("ACT");
+                boolean nsw = MainActivity.selectedStates.get("NSW");
+                boolean nt  = MainActivity.selectedStates.get("NT");
+                boolean qld = MainActivity.selectedStates.get("QLD");
+                boolean sa  = MainActivity.selectedStates.get("SA");
+                boolean tas = MainActivity.selectedStates.get("TAS");
+                boolean vic = MainActivity.selectedStates.get("VIC");
+                boolean wa  = MainActivity.selectedStates.get("WA");
+                boolean allStates = false;
+
+                for (Map.Entry<String,Boolean> entry : MainActivity.selectedStates.entrySet()) {
+                    String key = entry.getKey();
+                    Boolean value = entry.getValue();
+                    if (value) {
+                        allStates = true;
+                    }
+                    // do stuff
+                }
                 try {
-                    return abnSearchWSHttpGet.searchByNameSimpleProtocol(strings[0], false, false, false, true, true,
-                            true, true, true, true, true, "all");
-                } catch (URISyntaxException | IOException | SAXException | ParserConfigurationException e) {
+                    return abnSearchWSHttpGet.searchByNameSimpleProtocol(strings[0], allName,
+                            entityName, businessName, tradingName, act, nsw,nt , qld, sa,
+                            tas, vic, wa,allStates,  MainActivity.postCodeValue);
+                } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
@@ -193,7 +220,7 @@ public class LoadingActivity extends Activity {
                                     serializer.setIdentifierValue(abn.getString("identifierValue"));
                                     serializer.setAbnFrom(abn.optString("replacedFrom"));
                                     serializer.setAbnActive((abn.getString("identifierStatus")
-                                            .equals("Y") ? true : false));
+                                            .equals("Active") ? true : false));
                                     //
                                     serializer.setPostcode(mainPhysicalAddress.getString("postcode"));
                                     serializer.setStateCode(mainPhysicalAddress.getString("stateCode"));
@@ -225,7 +252,10 @@ public class LoadingActivity extends Activity {
 
 
                             JSONArray physicalAddressArray = businessEntity.getJSONArray("mainBusinessPhysicalAddress");
-                            JSONArray mainNameArray = businessEntity.getJSONArray("mainName");
+
+                            Object mainNameArray = businessEntity.get("mainName");
+
+
 
                             for (int i = 0; i < physicalAddressArray.length(); i++) {
                                 JSONObject addressObject = physicalAddressArray.getJSONObject(i);
@@ -244,11 +274,19 @@ public class LoadingActivity extends Activity {
                                 serializer.setPostcode(addressObject.getString("postcode"));
                                 serializer.setStateCode(addressObject.getString("stateCode"));
 
-                                JSONObject mainNameObject = mainNameArray.getJSONObject(i);
-                                serializer.setOrganisationName(mainNameObject.getString("organisationName"));
-                                serializer.setMainNameEffectiveFrom(mainNameObject.optString("effectiveFrom"));
-                                if (mainNameObject.has("effectiveTo")) {
-                                    serializer.setMainNameEffectiveTo(mainNameObject.getString("effectiveTo"));
+                                if (mainNameArray instanceof JSONArray) {
+                                    JSONObject mainNameObject = ((JSONArray) mainNameArray).getJSONObject(i);
+                                    serializer.setOrganisationName(mainNameObject.getString("organisationName"));
+                                    serializer.setMainNameEffectiveFrom(mainNameObject.optString("effectiveFrom"));
+                                    if (mainNameObject.has("effectiveTo")) {
+                                        serializer.setMainNameEffectiveTo(mainNameObject.getString("effectiveTo"));
+                                    }
+                                } else if (mainNameArray instanceof JSONObject) {
+                                    serializer.setOrganisationName(((JSONObject) mainNameArray).getString("organisationName"));
+                                    serializer.setMainNameEffectiveFrom(((JSONObject)mainNameArray).optString("effectiveFrom"));
+                                    if (((JSONObject) mainNameArray).has("effectiveTo")) {
+                                        serializer.setMainNameEffectiveTo(((JSONObject)mainNameArray).getString("effectiveTo"));
+                                    }
                                 }
                                 serializerArrayList.add(serializer);
                             }

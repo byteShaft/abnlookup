@@ -2,6 +2,8 @@
     <string name="app_name">Abnlookup</string>
     <string name="set">Set</string>
     <string name="cancel">Cancel</string>
+    <string name="test_id">ca-app-pub-7238DD377A056BB595B4AC87DB73E187</string>
+    <string name="production_ad_id">ca-app-pub-5205234788843633/5165945477</string>
 
     <string-array name="name_array">
         <item>All</item>
@@ -9,4 +11,5 @@
         <item>Business Name</item>
         <item>Trading Name</item>
     </string-array>
+
 </resources>

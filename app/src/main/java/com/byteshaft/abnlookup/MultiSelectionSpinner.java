@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.SpinnerAdapter;
 
@@ -14,6 +15,7 @@ import java.util.List;
 
 public class MultiSelectionSpinner extends android.support.v7.widget.AppCompatSpinner implements
         DialogInterface.OnMultiChoiceClickListener {
+
     String[] _items = null;
     boolean[] mSelection = null;
 
@@ -38,6 +40,8 @@ public class MultiSelectionSpinner extends android.support.v7.widget.AppCompatSp
     public void onClick(DialogInterface dialog, int which, boolean isChecked) {
         if (mSelection != null && which < mSelection.length) {
             mSelection[which] = isChecked;
+            Log.i("TAG", "Click " + _items[which]);
+            MainActivity.selectedStates.put(_items[which], isChecked);
 
             simple_adapter.clear();
             simple_adapter.add(buildSelectedItemString());
