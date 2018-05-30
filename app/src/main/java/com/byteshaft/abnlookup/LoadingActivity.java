@@ -71,7 +71,7 @@ public class LoadingActivity extends Activity {
 
         @Override
         protected JSONObject doInBackground(String... strings) {
-            if (strings[0].matches("[0-9]+") && strings[0].length() > 2) {
+            if (strings[0].matches("[0-9]+")) {
                 if (strings[0].length() == 9) {
                     try {
                         return abnSearchWSHttpGet.searchByACN(strings[0], true);
@@ -82,7 +82,7 @@ public class LoadingActivity extends Activity {
                     return abnSearchWSHttpGet.doQuery(strings[0], true);
                 }
 
-            } else if (isAlpha(strings[0])) {
+            } else  {
                 boolean allName = MainActivity.selectedNameType.get("All");
                 boolean entityName = MainActivity.selectedNameType.get("Entity Name");
                 boolean businessName = MainActivity.selectedNameType.get("Business Name");
@@ -109,7 +109,7 @@ public class LoadingActivity extends Activity {
                 try {
                     return abnSearchWSHttpGet.searchByNameSimpleProtocol(strings[0], allName,
                             entityName, businessName, tradingName, act, nsw,nt , qld, sa,
-                            tas, vic, wa,allStates,  MainActivity.postCodeValue);
+                            tas, vic, wa, allStates, MainActivity.postCodeValue);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -134,13 +134,44 @@ public class LoadingActivity extends Activity {
                             String acn = businessEntity.getString("ASICNumber");
 
                             JSONArray physicalAddressArray = businessEntity.getJSONArray("mainBusinessPhysicalAddress");
-                            JSONArray mainNameArray = businessEntity.getJSONArray("mainName");
+                            Object mainNameArray = null;
+                            if (businessEntity.has("mainName")) {
+                                mainNameArray = businessEntity.get("mainName");
+                            } else if (businessEntity.has("legalName")) {
+                                mainNameArray = businessEntity.get("legalName");
+                            }
 
                             for (int i = 0; i < physicalAddressArray.length(); i++) {
                                 JSONObject addressObject = physicalAddressArray.getJSONObject(i);
                                 Log.i("TAG", "single " + addressObject);
-
                                 Serializer serializer = new Serializer();
+                                if (businessEntity.has("mainName")) {
+                                    if (mainNameArray instanceof JSONArray) {
+                                        JSONObject mainNameObject = ((JSONArray) mainNameArray).getJSONObject(i);
+                                        serializer.setOrganisationName(mainNameObject.getString("organisationName"));
+                                        serializer.setMainNameEffectiveFrom(mainNameObject.getString("effectiveFrom"));
+                                        if (mainNameObject.has("effectiveTo")) {
+                                            serializer.setMainNameEffectiveTo(mainNameObject.getString("effectiveTo"));
+                                        }
+                                    } else if (mainNameArray instanceof JSONObject) {
+                                        serializer.setOrganisationName(((JSONObject) mainNameArray).getString("givenName") +
+                                                (((JSONObject) mainNameArray).getString("familyName")));
+                                        serializer.setMainNameEffectiveFrom(((JSONObject) mainNameArray).getString("effectiveFrom"));
+                                        if (((JSONObject) mainNameArray).has("effectiveTo")) {
+                                            serializer.setMainNameEffectiveTo(((JSONObject) mainNameArray).getString("effectiveTo"));
+                                        }
+                                    }
+                                } else if (businessEntity.has("legalName")) {
+                                    if (mainNameArray instanceof JSONObject) {
+                                        serializer.setOrganisationName(((JSONObject) mainNameArray).getString("givenName") + " ,"+
+                                                ((JSONObject) mainNameArray).getString("familyName"));
+                                        serializer.setMainNameEffectiveFrom(((JSONObject) mainNameArray).getString("effectiveFrom"));
+                                        if (((JSONObject) mainNameArray).has("effectiveTo")) {
+                                            serializer.setMainNameEffectiveTo(((JSONObject) mainNameArray).getString("effectiveTo"));
+                                        }
+
+                                    }
+                                }
                                 // single objects
                                 // entity type
                                 JSONObject entityType = businessEntity.getJSONObject("entityType");
@@ -157,13 +188,6 @@ public class LoadingActivity extends Activity {
                                 serializer.setEffectiveFrom(addressObject.getString("effectiveFrom"));
                                 serializer.setPostcode(addressObject.getString("postcode"));
                                 serializer.setStateCode(addressObject.getString("stateCode"));
-
-                                JSONObject mainNameObject = mainNameArray.getJSONObject(i);
-                                serializer.setOrganisationName(mainNameObject.getString("organisationName"));
-                                serializer.setMainNameEffectiveFrom(mainNameObject.getString("effectiveFrom"));
-                                if (mainNameObject.has("effectiveTo")) {
-                                    serializer.setMainNameEffectiveTo(mainNameObject.getString("effectiveTo"));
-                                }
                                 serializerArrayList.add(serializer);
                             }
 
@@ -342,8 +366,14 @@ public class LoadingActivity extends Activity {
                         }
 
                         if (businessEntity.has("mainTradingName")) {
-                            JSONObject mainTradingName = businessEntity.getJSONObject("mainTradingName");
-                            nameDetail.setTradingName(mainTradingName.optString("organisationName"));
+                            Object mainTradingName = businessEntity.get("mainTradingName");
+                            if (mainTradingName instanceof JSONObject) {
+                                nameDetail.setTradingName(((JSONObject)mainTradingName).optString("organisationName"));
+                            } else if (mainTradingName instanceof JSONArray) {
+                                JSONObject object = ((JSONArray) mainTradingName).getJSONObject(0);
+                                nameDetail.setTradingName(object.optString("organisationName"));
+                            }
+
                         }
 
                         Object object = businessEntity.get("entityStatus");

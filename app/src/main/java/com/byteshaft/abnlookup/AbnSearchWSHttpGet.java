@@ -117,13 +117,10 @@ public class AbnSearchWSHttpGet {
         params += "&AllNames=" + encodeBooleanParam(allName);
         params += "&EntityName=" + encodeBooleanParam(entityName);
         params += "&BusinessName=" + encodeBooleanParam(businessName);
-        params += "&TradingName=" + encodeBooleanParam(tradingName);
-        params += "&searchWidth=" + URLEncoder.encode("typical", UTF_8);
-        params += "&minimumScore=" + URLEncoder.encode("50", UTF_8);
-        params += "&maxSearchResults=" + URLEncoder.encode("200", UTF_8);
+        params += "&tradingName=" + encodeBooleanParam(tradingName);
 
 
-        params += "&AllStates=" + encodeBooleanParam(allStates);
+//        params += "&allStates=" + encodeBooleanParam(allStates);
         params += "&ACT=" + encodeBooleanParam(act);
         params += "&NSW=" + encodeBooleanParam(nsw);
         params += "&NT=" + encodeBooleanParam(nt);
@@ -133,8 +130,13 @@ public class AbnSearchWSHttpGet {
         params += "&VIC=" + encodeBooleanParam(vic);
         params += "&WA=" + encodeBooleanParam(wa);
         params += "&activeABNsOnly=" + encodeBooleanParam(true);
+        params += "&searchWidth=" + URLEncoder.encode("typical", UTF_8);
+        params += "&minimumScore=" + URLEncoder.encode("50", UTF_8);
+        params += "&maxSearchResults=" + URLEncoder.encode("200", UTF_8);
 
         params += "&postcode=" + URLEncoder.encode(postcode, UTF_8);
+
+        Log.i("TAG", " params " + params);
 
         results = doRequest("ABRSearchByNameAdvancedSimpleProtocol2017", params);
 
@@ -177,7 +179,8 @@ public class AbnSearchWSHttpGet {
         JSONObject result = null;
         String res;
         URL url = new URL("https://abr.business.gov.au/abrxmlsearch/ABRXMLSearch.asmx/" + service + "?authenticationGuid=" + URLEncoder.encode(guid, UTF_8) + parameters);
-        Log.i("TAG", "url  " + url);
+        Log.e("TAG", "url  " + url);
+        System.out.println(url);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setRequestMethod("GET");
         connection.setRequestProperty("Content-Type", "text/xml; charset-utf-8");

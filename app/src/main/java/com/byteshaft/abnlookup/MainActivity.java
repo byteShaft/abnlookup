@@ -36,6 +36,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -56,7 +57,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Spinner nameType;
     private String nameTypeValue;
     public static HashMap<String, Boolean> selectedNameType;
-    public static String postCodeValue = "All";
+    public static String postCodeValue = "all";
     private TextView state;
     private TextView postCodeTitle;
     private TextView nameTypeTitle;
@@ -210,7 +211,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main, menu);
-
         MenuItem item = menu.findItem(R.id.action_search);
 
         return true;
@@ -225,16 +225,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.button:
                 Log.wtf("Items ", spinner.getSelectedItemsAsString());
                 String query = editText.getText().toString();
+                Log.i("TAG", " just searched " + query);
                 Intent intent = new Intent(getApplicationContext(), LoadingActivity.class);
-                if (query.matches("[0-9]+") && query.length() > 2) {
+                if (stringContainsNumber(query)) {
                     if (query.length() == 9) {
                         MODE = ACN;
                     } else {
                         MODE = ABN;
                     }
-                } else if (isAlpha(query)) {
+                } else {
                     MODE = AppGlobals.NAME;
                 }
+                Log.i("TAG", "MODE " + MODE);
                 intent.putExtra("post_code", postCode.getText().toString());
                 intent.putExtra("query", query);
                 intent.putExtra("mode", MODE);
@@ -242,6 +244,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 startActivity(intent);
                 break;
         }
+    }
+
+    public boolean stringContainsNumber( String s ) {
+        return Pattern.compile( "[0-9]" ).matcher( s ).find();
     }
 
     public boolean isAlpha(String name) {
