@@ -338,9 +338,15 @@ public class LoadingActivity extends Activity {
                         }
 
                         if (businessEntity.has("goodsAndServicesTax")) {
-                            JSONObject gstMain = businessEntity.getJSONObject("goodsAndServicesTax");
-                            String gstDate = gstMain.getString("effectiveFrom");
-                            nameDetail.setGst(gstDate);
+                            Object gstMain = businessEntity.get("goodsAndServicesTax");
+                            if (gstMain instanceof JSONObject) {
+                                String gstDate = ((JSONObject)gstMain).getString("effectiveFrom");
+                                nameDetail.setGst(gstDate);
+                            } else if (gstMain instanceof JSONArray) {
+                                JSONObject json = ((JSONArray) gstMain).getJSONObject(0);
+                                String gstDate = json.getString("effectiveFrom");
+                                nameDetail.setGst(gstDate);
+                            }
                         }
                         if (businessEntity.has("businessName")) {
                             Object businessNames = businessEntity.get("businessName");

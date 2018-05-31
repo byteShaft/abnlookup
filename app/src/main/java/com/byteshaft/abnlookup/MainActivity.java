@@ -98,9 +98,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             }
         });
-        adView.setAdSize(AdSize.BANNER);
-        adView.setAdUnitId(getResources().getString(R.string.test_id));
-        AdRequest adRequest = new AdRequest.Builder().addTestDevice(AdRequest.DEVICE_ID_EMULATOR).build();
+        AdRequest adRequest = new AdRequest.Builder().build();
         adView.loadAd(adRequest);
         adView.setAdListener(new AdListener() {
             @Override
