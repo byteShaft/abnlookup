@@ -15,6 +15,16 @@ public class NameDetailSerializer implements Serializable{
     private ArrayList<BusinessName> businessNames;
     private String ACN;
 
+    public String getOrgTitle() {
+        return orgTitle;
+    }
+
+    public void setOrgTitle(String orgTitle) {
+        this.orgTitle = orgTitle;
+    }
+
+    private String orgTitle = "Entity Name";
+
     public String getACN() {
         return ACN;
     }

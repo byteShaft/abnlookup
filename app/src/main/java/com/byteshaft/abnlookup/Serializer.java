@@ -12,6 +12,16 @@ public class Serializer implements Serializable {
     private String effectiveFrom;
     private String ABN;
 
+    public String getOrgTitle() {
+        return orgTitle;
+    }
+
+    public void setOrgTitle(String orgTitle) {
+        this.orgTitle = orgTitle;
+    }
+
+    private String orgTitle = "Entity Name";
+
     public String getEntityType() {
         return entityType;
     }

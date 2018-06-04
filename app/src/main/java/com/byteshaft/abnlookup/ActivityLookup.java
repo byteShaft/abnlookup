@@ -94,6 +94,7 @@ public class ActivityLookup extends AppCompatActivity {
     }
 
     private class ListAdapter extends BaseAdapter {
+
         private ViewHolder viewHolder;
         private Context context;
         private ArrayList<Serializer> listItems;
@@ -119,15 +120,16 @@ public class ActivityLookup extends AppCompatActivity {
             } else {
                 viewHolder = (ViewHolder) convertView.getTag();
             }
-            Serializer items = listItems.get(position);
-            viewHolder.title.setText(items.getOrganisationName());
-            viewHolder.stateCode.setText(items.getStateCode());
-            viewHolder.postCode.setText(items.getPostcode());
+            Serializer singleObject = listItems.get(position);
+            viewHolder.title.setText(singleObject.getOrganisationName());
+            viewHolder.stateCode.setText(singleObject.getStateCode());
+            viewHolder.postCode.setText(singleObject.getPostcode());
+            viewHolder.entityName.setText(singleObject.getOrgTitle());
             //single objects
-            if (items.getEntityStatus() != null) {
-                viewHolder.status.setText(items.getEntityStatus());
+            if (singleObject.getEntityStatus() != null) {
+                viewHolder.status.setText(singleObject.getEntityStatus());
             } else {
-                if (items.isAbnActive()) {
+                if (singleObject.isAbnActive()) {
                     viewHolder.status.setText("Active");
                     viewHolder.status.setTextColor(getResources().getColor(android.R.color.holo_green_light));
                 } else {
@@ -135,8 +137,8 @@ public class ActivityLookup extends AppCompatActivity {
                     viewHolder.status.setTextColor(getResources().getColor(android.R.color.holo_red_light));
                 }
             }
-            if (items.identifierValue != null && !items.identifierValue.isEmpty()) {
-                viewHolder.identifierValue.setText(String.valueOf(items.identifierValue));
+            if (singleObject.identifierValue != null && !singleObject.identifierValue.isEmpty()) {
+                viewHolder.identifierValue.setText(String.valueOf(singleObject.identifierValue));
             } else {
                 viewHolder.identifierValue.setText("");
             }

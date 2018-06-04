@@ -87,6 +87,11 @@ public class LoadingActivity extends Activity {
                 boolean entityName = MainActivity.selectedNameType.get("Entity Name");
                 boolean businessName = MainActivity.selectedNameType.get("Business Name");
                 boolean tradingName = MainActivity.selectedNameType.get("Trading Name");
+                if (allName) {
+                    entityName = true;
+                    businessName = true;
+                    tradingName = true;
+                }
 
                 boolean act = MainActivity.selectedStates.get("ACT");
                 boolean nsw = MainActivity.selectedStates.get("NSW");
@@ -129,66 +134,125 @@ public class LoadingActivity extends Activity {
                             JSONObject response = mainObject.getJSONObject("response");
                             JSONObject businessEntity = response.getJSONObject("businessEntity201408");
                             // single objects
-                            JSONObject entityStatusObject = businessEntity.getJSONObject("entityStatus");
+
+                            Serializer serializer = new Serializer();
+
+                            Object entityStatusObject = businessEntity.get("entityStatus");
+                            if (entityStatusObject instanceof JSONObject) {
+                                serializer.setEntityStatus(((JSONObject) entityStatusObject).getString("entityStatusCode"));
+                            } else if (entityStatusObject instanceof JSONArray) {
+                                JSONObject jsonObject1 = ((JSONArray) entityStatusObject).getJSONObject(0);
+                                serializer.setEntityStatus(jsonObject1.getString("entityStatusCode"));
+                            }
+
+//                            JSONObject entityStatusObject = businessEntity.getJSONObject("entityStatus");
                             JSONObject abn = businessEntity.getJSONObject("ABN");
                             String acn = businessEntity.getString("ASICNumber");
 
-                            JSONArray physicalAddressArray = businessEntity.getJSONArray("mainBusinessPhysicalAddress");
+                            Object physicalAddressArray = businessEntity.get("mainBusinessPhysicalAddress");
                             Object mainNameArray = null;
                             if (businessEntity.has("mainName")) {
                                 mainNameArray = businessEntity.get("mainName");
                             } else if (businessEntity.has("legalName")) {
                                 mainNameArray = businessEntity.get("legalName");
                             }
-
-                            for (int i = 0; i < physicalAddressArray.length(); i++) {
-                                JSONObject addressObject = physicalAddressArray.getJSONObject(i);
-                                Log.i("TAG", "single " + addressObject);
-                                Serializer serializer = new Serializer();
-                                if (businessEntity.has("mainName")) {
-                                    if (mainNameArray instanceof JSONArray) {
-                                        JSONObject mainNameObject = ((JSONArray) mainNameArray).getJSONObject(i);
-                                        serializer.setOrganisationName(mainNameObject.getString("organisationName"));
-                                        serializer.setMainNameEffectiveFrom(mainNameObject.getString("effectiveFrom"));
-                                        if (mainNameObject.has("effectiveTo")) {
-                                            serializer.setMainNameEffectiveTo(mainNameObject.getString("effectiveTo"));
+                            if (physicalAddressArray instanceof  JSONArray) {
+                                for (int i = 0; i < ((JSONArray)physicalAddressArray).length(); i++) {
+                                    JSONObject addressObject = ((JSONArray)physicalAddressArray)
+                                            .getJSONObject(i);
+                                    Log.i("TAG", "single " + addressObject);
+                                    if (businessEntity.has("mainName")) {
+                                        if (mainNameArray instanceof JSONArray) {
+                                            JSONObject mainNameObject = ((JSONArray) mainNameArray).getJSONObject(i);
+                                            serializer.setOrganisationName(mainNameObject.getString("organisationName"));
+                                            serializer.setMainNameEffectiveFrom(mainNameObject.getString("effectiveFrom"));
+                                            if (mainNameObject.has("effectiveTo")) {
+                                                serializer.setMainNameEffectiveTo(mainNameObject.getString("effectiveTo"));
+                                            }
+                                        } else if (mainNameArray instanceof JSONObject) {
+                                            serializer.setOrganisationName(((JSONObject) mainNameArray).getString("givenName") +
+                                                    (((JSONObject) mainNameArray).getString("familyName")));
+                                            serializer.setMainNameEffectiveFrom(((JSONObject) mainNameArray).getString("effectiveFrom"));
+                                            if (((JSONObject) mainNameArray).has("effectiveTo")) {
+                                                serializer.setMainNameEffectiveTo(((JSONObject) mainNameArray).getString("effectiveTo"));
+                                            }
                                         }
-                                    } else if (mainNameArray instanceof JSONObject) {
-                                        serializer.setOrganisationName(((JSONObject) mainNameArray).getString("givenName") +
-                                                (((JSONObject) mainNameArray).getString("familyName")));
-                                        serializer.setMainNameEffectiveFrom(((JSONObject) mainNameArray).getString("effectiveFrom"));
-                                        if (((JSONObject) mainNameArray).has("effectiveTo")) {
-                                            serializer.setMainNameEffectiveTo(((JSONObject) mainNameArray).getString("effectiveTo"));
+                                    } else if (businessEntity.has("legalName")) {
+                                        if (mainNameArray instanceof JSONObject) {
+                                            serializer.setOrganisationName(((JSONObject) mainNameArray).getString("givenName") + " ," +
+                                                    ((JSONObject) mainNameArray).getString("familyName"));
+                                            serializer.setMainNameEffectiveFrom(((JSONObject) mainNameArray).getString("effectiveFrom"));
+                                            if (((JSONObject) mainNameArray).has("effectiveTo")) {
+                                                serializer.setMainNameEffectiveTo(((JSONObject) mainNameArray).getString("effectiveTo"));
+                                            }
+
                                         }
                                     }
-                                } else if (businessEntity.has("legalName")) {
-                                    if (mainNameArray instanceof JSONObject) {
-                                        serializer.setOrganisationName(((JSONObject) mainNameArray).getString("givenName") + " ,"+
-                                                ((JSONObject) mainNameArray).getString("familyName"));
-                                        serializer.setMainNameEffectiveFrom(((JSONObject) mainNameArray).getString("effectiveFrom"));
-                                        if (((JSONObject) mainNameArray).has("effectiveTo")) {
-                                            serializer.setMainNameEffectiveTo(((JSONObject) mainNameArray).getString("effectiveTo"));
-                                        }
+                                    // single objects
+                                    // entity type
+                                    JSONObject entityType = businessEntity.getJSONObject("entityType");
+                                    serializer.setEntityType(entityType.getString("entityDescription"));
 
-                                    }
+//                                    serializer.setEntityStatus(entityStatusObject.getString("entityStatusCode"));
+                                    serializer.setIdentifierValue(abn.getString("identifierValue"));
+                                    serializer.setAbnFrom(abn.getString("replacedFrom"));
+                                    serializer.setAbnActive((abn.getString("isCurrentIndicator").equals("Y") ? true : false));
+                                    //
+                                    serializer.setACN(acn);
+
+                                    serializer.setEffectiveTo(addressObject.getString("effectiveTo"));
+                                    serializer.setEffectiveFrom(addressObject.getString("effectiveFrom"));
+                                    serializer.setPostcode(addressObject.getString("postcode"));
+                                    serializer.setStateCode(addressObject.getString("stateCode"));
+                                    serializerArrayList.add(serializer);
                                 }
-                                // single objects
-                                // entity type
-                                JSONObject entityType = businessEntity.getJSONObject("entityType");
-                                serializer.setEntityType(entityType.getString("entityDescription"));
+                            } else if (physicalAddressArray instanceof JSONObject) {
+                                    if (businessEntity.has("mainName")) {
+                                        if (mainNameArray instanceof JSONArray) {
+                                            for (int i = 0; i < ((JSONArray)mainNameArray).length(); i++) {
+                                                JSONObject mainNameObject = ((JSONArray) mainNameArray).getJSONObject(i);
+                                                serializer.setOrganisationName(mainNameObject.getString("organisationName"));
+                                                serializer.setMainNameEffectiveFrom(mainNameObject.getString("effectiveFrom"));
+                                                if (mainNameObject.has("effectiveTo")) {
+                                                    serializer.setMainNameEffectiveTo(mainNameObject.getString("effectiveTo"));
+                                                }
+                                            }
+                                        } else if (mainNameArray instanceof JSONObject) {
+                                            serializer.setOrganisationName(((JSONObject) mainNameArray).getString("givenName") +
+                                                    (((JSONObject) mainNameArray).getString("familyName")));
+                                            serializer.setMainNameEffectiveFrom(((JSONObject) mainNameArray).getString("effectiveFrom"));
+                                            if (((JSONObject) mainNameArray).has("effectiveTo")) {
+                                                serializer.setMainNameEffectiveTo(((JSONObject) mainNameArray).getString("effectiveTo"));
+                                            }
+                                        }
+                                    } else if (businessEntity.has("legalName")) {
+                                        if (mainNameArray instanceof JSONObject) {
+                                            serializer.setOrganisationName(((JSONObject) mainNameArray).getString("givenName") + " ," +
+                                                    ((JSONObject) mainNameArray).getString("familyName"));
+                                            serializer.setMainNameEffectiveFrom(((JSONObject) mainNameArray).getString("effectiveFrom"));
+                                            if (((JSONObject) mainNameArray).has("effectiveTo")) {
+                                                serializer.setMainNameEffectiveTo(((JSONObject) mainNameArray).getString("effectiveTo"));
+                                            }
 
-                                serializer.setEntityStatus(entityStatusObject.getString("entityStatusCode"));
-                                serializer.setIdentifierValue(abn.getString("identifierValue"));
-                                serializer.setAbnFrom(abn.getString("replacedFrom"));
-                                serializer.setAbnActive((abn.getString("isCurrentIndicator").equals("Y") ? true : false));
-                                //
-                                serializer.setACN(acn);
+                                        }
+                                    }
+                                    // single objects
+                                    // entity type
+                                    JSONObject entityType = businessEntity.getJSONObject("entityType");
+                                    serializer.setEntityType(entityType.getString("entityDescription"));
 
-                                serializer.setEffectiveTo(addressObject.getString("effectiveTo"));
-                                serializer.setEffectiveFrom(addressObject.getString("effectiveFrom"));
-                                serializer.setPostcode(addressObject.getString("postcode"));
-                                serializer.setStateCode(addressObject.getString("stateCode"));
-                                serializerArrayList.add(serializer);
+                                    serializer.setIdentifierValue(abn.getString("identifierValue"));
+                                    serializer.setAbnFrom(abn.getString("replacedFrom"));
+                                    serializer.setAbnActive((abn.getString("isCurrentIndicator").equals("Y") ? true : false));
+                                    //
+                                    serializer.setACN(acn);
+
+                                    serializer.setEffectiveTo(((JSONObject)physicalAddressArray).getString("effectiveTo"));
+                                    serializer.setEffectiveFrom(((JSONObject)physicalAddressArray).getString("effectiveFrom"));
+                                    serializer.setPostcode(((JSONObject)physicalAddressArray).getString("postcode"));
+                                    serializer.setStateCode(((JSONObject)physicalAddressArray).getString("stateCode"));
+                                    serializerArrayList.add(serializer);
+
                             }
 
                         } catch (JSONException e) {
@@ -206,11 +270,11 @@ public class LoadingActivity extends Activity {
                             JSONArray jsonArray = mainList.getJSONArray("searchResultsRecord");
                             for (int i = 0; i < jsonArray.length(); i++) {
                                 JSONObject singleOrgdata = jsonArray.getJSONObject(i);
+                                Serializer serializer = new Serializer();
                                 Log.i("TAG", "single main " + singleOrgdata);
                                 if (singleOrgdata.has("legalName")) {
                                     JSONObject mainPhysicalAddress = singleOrgdata.getJSONObject("mainBusinessPhysicalAddress");
                                     JSONObject legal = singleOrgdata.getJSONObject("legalName");
-                                    Serializer serializer = new Serializer();
                                     JSONObject abn = singleOrgdata.getJSONObject("ABN");
 
                                     // single objects
@@ -230,14 +294,15 @@ public class LoadingActivity extends Activity {
                                     JSONObject main = null;
                                     if (singleOrgdata.has("mainTradingName")) {
                                         main = singleOrgdata.getJSONObject("mainTradingName");
+                                        serializer.setOrgTitle("Trading Name");
                                     } else if (singleOrgdata.has("mainName")) {
                                         main = singleOrgdata.getJSONObject("mainName");
                                     } else if (singleOrgdata.has("businessName")) {
                                         main = singleOrgdata.getJSONObject("businessName");
+                                        serializer.setOrgTitle("Business Name");
                                     } else if (singleOrgdata.has("otherTradingName")) {
                                         main = singleOrgdata.getJSONObject("otherTradingName");
                                     }
-                                    Serializer serializer = new Serializer();
                                     JSONObject abn = singleOrgdata.getJSONObject("ABN");
 
                                     // single objects
@@ -291,7 +356,6 @@ public class LoadingActivity extends Activity {
                                 serializer.setAbnActive((abn.getString("isCurrentIndicator").equals("Y") ? true : false));
                                 serializer.setEntityStatus(entityStatusObject.getString("entityStatusCode"));
                                 serializer.setIdentifierValue(abn.getString("identifierValue"));
-                                //
 
                                 serializer.setEffectiveTo(addressObject.getString("effectiveTo"));
                                 serializer.setEffectiveFrom(addressObject.getString("effectiveFrom"));
@@ -336,7 +400,6 @@ public class LoadingActivity extends Activity {
                             nameDetail.setBusinessLocation(((JSONObject) mainPhysicalAddress).optString("stateCode") + " "
                                     +((JSONObject) mainPhysicalAddress).optString("postcode"));
                         }
-
                         if (businessEntity.has("goodsAndServicesTax")) {
                             Object gstMain = businessEntity.get("goodsAndServicesTax");
                             if (gstMain instanceof JSONObject) {
@@ -349,6 +412,7 @@ public class LoadingActivity extends Activity {
                             }
                         }
                         if (businessEntity.has("businessName")) {
+                            nameDetail.setOrgTitle("Business Name");
                             Object businessNames = businessEntity.get("businessName");
                             if (businessNames instanceof JSONArray) {
                                 ArrayList<BusinessName> names = new ArrayList<>();
@@ -372,11 +436,13 @@ public class LoadingActivity extends Activity {
                         }
 
                         if (businessEntity.has("mainTradingName")) {
+                            nameDetail.setOrgTitle("Trading Name");
                             Object mainTradingName = businessEntity.get("mainTradingName");
                             if (mainTradingName instanceof JSONObject) {
-                                nameDetail.setTradingName(((JSONObject)mainTradingName).optString("organisationName"));
+                                nameDetail.setTradingName(((JSONObject) mainTradingName).optString("organisationName"));
                             } else if (mainTradingName instanceof JSONArray) {
                                 JSONObject object = ((JSONArray) mainTradingName).getJSONObject(0);
+                                nameDetail.setOrgTitle("Organization Name");
                                 nameDetail.setTradingName(object.optString("organisationName"));
                             }
 
@@ -410,9 +476,11 @@ public class LoadingActivity extends Activity {
                             if (mainNameObject instanceof JSONObject) {
                                 JSONObject nameObject = businessEntity.getJSONObject("mainName");
                                 nameDetail.setEntityName(nameObject.optString("organisationName"));
+                                nameDetail.setOrgTitle("Organization Name");
                             } else if (mainNameObject instanceof JSONArray) {
                                 JSONObject obj = ((JSONArray) mainNameObject).getJSONObject(0);
                                 nameDetail.setEntityName(obj.optString("organisationName"));
+                                nameDetail.setOrgTitle("Organization Name");
                             }
                         } else {
                             Object obj = businessEntity.get("legalName");
