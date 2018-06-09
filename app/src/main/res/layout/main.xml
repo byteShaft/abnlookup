@@ -19,7 +19,7 @@
         android:drawablePadding="2dp"
         android:ems="10"
         android:hint="Abn/Acn/Name"
-        android:inputType="textPersonName"
+        android:inputType="text"
         android:padding="4dp"/>
 
     <Button
